@@ -16,7 +16,7 @@ MEMORY_GB=12
 
 # Notificación Telegram
 TELEGRAM_BOT_TOKEN="7648677972:AAFrkKEl_qAG-KJjnj62UbVx7FRY44xoD_o"
-TELEGRAM_CHAT_ID="7648677972"
+TELEGRAM_CHAT_ID="5871448223"
 
 # Dominios de disponibilidad a probar (prefijo real de tu tenancy: SHiu)
 ADS=(
