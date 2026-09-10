@@ -1,10 +1,11 @@
 #!/bin/bash
 # ============================================================
 # Reintenta crear una instancia Ampere A1 (Always Free) hasta
-# que Oracle tenga capacidad disponible.
+# que Oracle tenga capacidad disponible. Notifica por Telegram
+# al conseguirla.
 # ============================================================
 
-# --- RELLENA ESTOS VALORES ANTES DE CORRER EL SCRIPT ---
+# --- VALORES YA RELLENADOS ---
 COMPARTMENT_ID="ocid1.tenancy.oc1..aaaaaaaaflp75xdj3sdf3bslw3npfeky5a7okqska33xiasotprlfg4yyapa"
 SUBNET_ID="ocid1.subnet.oc1.iad.aaaaaaaajteccwlrho5y4jnyih3kz2iixhf7nlttybigy7w6zue5pdwj3r7q"
 IMAGE_ID="ocid1.image.oc1.iad.aaaaaaaacuygljashkvpqu5qqmlausq2vwrwasp3lxpbpitxjhvbhsktlhma"
@@ -13,16 +14,26 @@ DISPLAY_NAME="minecraft-ampere"
 OCPUS=2
 MEMORY_GB=12
 
-# Dominios de disponibilidad a probar (ajusta el prefijo según tu tenancy,
-# lo ves en la consola al lado de "1 d.C.", "2 d.C.", "3 d.C.")
+# Notificación Telegram
+TELEGRAM_BOT_TOKEN="7648677972:AAFrkKEl_qAG-KJjnj62UbVx7FRY44xoD_o"
+TELEGRAM_CHAT_ID="7648677972"
+
+# Dominios de disponibilidad a probar (prefijo real de tu tenancy: SHiu)
 ADS=(
   "SHiu:US-ASHBURN-AD-1"
   "SHiu:US-ASHBURN-AD-2"
   "SHiu:US-ASHBURN-AD-3"
 )
 
-SLEEP_SECONDS=80
+SLEEP_SECONDS=60
 ATTEMPT=0
+
+notify_telegram() {
+  local MSG="$1"
+  curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+    -d chat_id="${TELEGRAM_CHAT_ID}" \
+    -d text="${MSG}" > /dev/null
+}
 
 SSH_KEY_CONTENT=$(cat "$SSH_KEY_FILE")
 
@@ -52,10 +63,15 @@ while true; do
     if echo "$RESULT" | grep -qi "OutOfCapacity\|LimitExceeded\|Out of host capacity"; then
       echo "  Sin capacidad en $AD. Probando el siguiente..."
       continue
+    elif echo "$RESULT" | grep -qi "TooManyRequests"; then
+      echo "  Límite de tasa alcanzado. Esperando un ciclo extra antes de seguir..."
+      sleep "$SLEEP_SECONDS"
+      continue
     elif echo "$RESULT" | grep -qi "\"lifecycle-state\": \"RUNNING\""; then
       echo ""
       echo "🎉 ¡Instancia creada exitosamente en $AD!"
       echo "$RESULT" | grep -A2 "public-ip"
+      notify_telegram "✅ Instancia Oracle creada en $AD. Revisa la consola para ver la IP pública."
       echo ""
       echo "Revisa la consola de Oracle para ver la IP pública."
       exit 0
