@@ -11,8 +11,8 @@ SUBNET_ID="ocid1.subnet.oc1.iad.aaaaaaaajteccwlrho5y4jnyih3kz2iixhf7nlttybigy7w6
 IMAGE_ID="ocid1.image.oc1.iad.aaaaaaaacuygljashkvpqu5qqmlausq2vwrwasp3lxpbpitxjhvbhsktlhma"
 SSH_KEY_FILE="$HOME/.ssh/authorized_keys"   # o la ruta a tu .pub
 DISPLAY_NAME="minecraft-ampere"
-OCPUS=2
-MEMORY_GB=12
+OCPUS=1
+MEMORY_GB=6
 
 # Notificación Telegram
 TELEGRAM_BOT_TOKEN="7648677972:AAFrkKEl_qAG-KJjnj62UbVx7FRY44xoD_o"
@@ -25,7 +25,7 @@ ADS=(
   "SHiu:US-ASHBURN-AD-3"
 )
 
-SLEEP_SECONDS=60
+SLEEP_SECONDS=80
 ATTEMPT=0
 
 notify_telegram() {
